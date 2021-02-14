@@ -44,9 +44,10 @@ public class RequestProcessor {
     }
 
     void editMeme(MemeType meme) throws MemeNotFound {
+        String url = meme.getUrl().toString();
         if (memeRepository.existsById(meme.getId())) {
-            if (meme.getUrl() != null && meme.getCaption() != null) memeRepository.updateUrlCaption(meme.getId(), meme.getUrl(), meme.getCaption());
-            else if (meme.getUrl() == null) memeRepository.updateCaption(meme.getId(), meme.getCaption());
+            if (!(url.isEmpty()) && !(meme.getCaption().isEmpty())) memeRepository.updateUrlCaption(meme.getId(), meme.getUrl(), meme.getCaption());
+            else if (url.isEmpty()) memeRepository.updateCaption(meme.getId(), meme.getCaption());
             else memeRepository.updateUrl(meme.getId(), meme.getUrl());
         }
         else throw new MemeNotFound();
@@ -55,19 +56,13 @@ public class RequestProcessor {
 
     void ifMemeExists(String submittedBy, URL url, String caption){
         MemeType meme;
-        try {
             meme = memeRepository.ifMemeExists(submittedBy, url, caption);
             if (meme.getId() != null) throw new MemeAlreadyExists();
-
-        }
-        catch (Exception e){
-            e.getMessage();
-        }
     }
 
     void checkConstraints(MemeType meme){
-        if (meme.getSubmittedBy() != null && meme.getCaption() != null && meme.getUrl() != null);
-        else throw new ImproperConstraintException();
+        String url = meme.getUrl().toString();
+        if (meme.getSubmittedBy().isEmpty() || meme.getCaption().isEmpty() || url.isEmpty()) throw new ImproperConstraintException();
     }
 
 }
