@@ -16,18 +16,19 @@ public class MemeType implements java.io.Serializable{
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name="UUID", strategy="org.hibernate.id.UUIDGenerator")
     @Id
-    @Column(name="ID", nullable = false)
+    @Column(name="id", nullable = false)
     private UUID id;
 
+    @Column(name="submittedby", nullable = false)
     private String submittedBy;
 
-    @Column(name="URL", nullable = false)
+    @Column(name="url", nullable = false)
     private URL url;
 
-    @Column(name="CAPTION", nullable = false)
+    @Column(name="caption", nullable = false)
     private String caption;
 
-    @Column(name="DATETIME")
+    @Column(name="datetime", nullable = false)
     private LocalDateTime submitDateTime;
 
     public MemeType(){

@@ -28,5 +28,7 @@ public interface MemeRepository extends PagingAndSortingRepository<MemeType, UUI
     @Query(value = "UPDATE meme_table SET URL=?2, CAPTION=?3 WHERE ID=?1", nativeQuery = true)
     void updateUrlCaption(UUID id, URL url, String caption);
 
+    @Query(value="SELECT * FROM meme_table WHERE submittedby = ?1 and url = ?2 and caption = ?3", nativeQuery = true)
+    public MemeType ifMemeExists(String submittedby, URL url, String caption);
 
 }

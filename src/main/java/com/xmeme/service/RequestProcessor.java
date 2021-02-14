@@ -1,5 +1,8 @@
 package com.xmeme.service;
 
+import com.xmeme.exception.ImproperConstraintException;
+import com.xmeme.exception.MemeAlreadyExists;
+import com.xmeme.exception.MemeNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,32 +30,44 @@ public class RequestProcessor {
     }
 
     UUID saveMeme(MemeType meme){
+        ifMemeExists(meme.getSubmittedBy(), meme.getUrl(), meme.getCaption());
+        checkConstraints(meme);
         meme.setSubmitDateTime(LocalDateTime.now());
-        System.out.println(meme.getId());
-        System.out.println(meme.toString());
         memeRepository.save(meme);
+        System.out.println(meme.toString());
         return meme.getId();
     }
 
-    Page<MemeType> getLatestHundred(){
-        Pageable page = PageRequest.of(0, 100, Sort.by("datetime").descending());
+    Page<MemeType> getLatestHundred(int pageNo, int pageSize){
+        Pageable page = PageRequest.of(pageNo, pageSize, Sort.by("datetime").descending());
         return memeRepository.getLatestHundred(page);
     }
 
-    void editMeme(UUID id, URL url, String caption) throws Exception {
-        if (memeRepository.existsById(id)) memeRepository.updateUrlCaption(id, url, caption);
-        else throw new Exception("Meme not found");
+    void editMeme(MemeType meme) throws MemeNotFound {
+        if (memeRepository.existsById(meme.getId())) {
+            if (meme.getUrl() != null && meme.getCaption() != null) memeRepository.updateUrlCaption(meme.getId(), meme.getUrl(), meme.getCaption());
+            else if (meme.getUrl() == null) memeRepository.updateCaption(meme.getId(), meme.getCaption());
+            else memeRepository.updateUrl(meme.getId(), meme.getUrl());
+        }
+        else throw new MemeNotFound();
     }
 
-    void editCaption(UUID id, String caption) throws Exception{
-        if (memeRepository.existsById(id)) memeRepository.updateCaption(id, caption);
-        else throw new Exception("Meme does not exist");
+
+    void ifMemeExists(String submittedBy, URL url, String caption){
+        MemeType meme;
+        try {
+            meme = memeRepository.ifMemeExists(submittedBy, url, caption);
+            if (meme.getId() != null) throw new MemeAlreadyExists();
+
+        }
+        catch (Exception e){
+            e.getMessage();
+        }
     }
 
-    void editUrl(UUID id, URL url) throws Exception {
-        if (memeRepository.existsById(id)) memeRepository.updateUrl(id, url);
-        else throw new Exception("Meme does not exist");
+    void checkConstraints(MemeType meme){
+        if (meme.getSubmittedBy() != null && meme.getCaption() != null && meme.getUrl() != null);
+        else throw new ImproperConstraintException();
     }
-
 
 }
